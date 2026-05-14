@@ -416,3 +416,16 @@ class SpotDifferenceGame:
         # If maximum mistakes reached, fail the game
         if self.mistakes >= self.config.MAX_MISTAKES:
             self.fail_game()
+
+    def point_inside_area(self, x, y, area):
+    # Determine a "proximity" buffer around the difference area
+    # This allows clicks near the difference to count as correct
+    padding = int(
+        self.original_image.height * self.config.PROXIMITY_PADDING_RATIO
+    )
+
+    # Check if the click (x, y) lies within the difference rectangle plus padding
+    return (
+        area["x1"] - padding <= x <= area["x2"] + padding and
+        area["y1"] - padding <= y <= area["y2"] + padding
+    )
