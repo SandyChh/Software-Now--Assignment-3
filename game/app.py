@@ -425,10 +425,10 @@ class SpotDifferenceGame:
     )
 
     # Check if the click (x, y) lies within the difference rectangle plus padding
-    return (
-        area["x1"] - padding <= x <= area["x2"] + padding and
-        area["y1"] - padding <= y <= area["y2"] + padding
-    )
+        return (
+            area["x1"] - padding <= x <= area["x2"] + padding and
+            area["y1"] - padding <= y <= area["y2"] + padding
+        )
 
     def complete_current_image(self):
         # Mark the current image round as completed
