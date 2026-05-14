@@ -336,16 +336,16 @@ class SpotDifferenceGame:
     # such as errors, warnings, or success notifications.
     # The message automatically disappears after a set duration. 
     
-        def show_temporary_status(self, text, color="black", duration=None):
-            if duration is None:
-                duration = self.config.STATUS_DURATION_MS
+    def show_temporary_status(self, text, color="black", duration=None):
+        if duration is None:
+            duration = self.config.STATUS_DURATION_MS
 
-            if self.status_after_id:
-                self.root.after_cancel(self.status_after_id)
+        if self.status_after_id:
+            self.root.after_cancel(self.status_after_id)
 
-            self.status_label.config(text=text, fg=color)
+        self.status_label.config(text=text, fg=color)
 
-            self.status_after_id = self.root.after(
-                duration,
-                self.clear_temporary_status
-            )
+        self.status_after_id = self.root.after(
+            duration,
+            self.clear_temporary_status
+        )
