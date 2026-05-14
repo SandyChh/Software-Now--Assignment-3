@@ -276,23 +276,76 @@ class SpotDifferenceGame:
 # generating altered images and preparing the interface
 # for a new spot-the-difference challenge.
 
-    def start_new_image_round():
-        pass
-    
-# It Displays a temporary status message to the user
-# such as errors, warnings, or success notifications.
-# The message automatically disappears after a set duration. 
- 
-    def show_temporary_status(self, text, color="black", duration=None):
-        if duration is None:
-            duration = self.config.STATUS_DURATION_MS
+    def start_new_image_round(self):
+        # Reset game state for a new image round
+        self.game_over = False  # Allow guesses again
+        self.current_image_completed = False  # Mark current round as not completed
+        self.mistakes = 0  # Reset mistakes counter
+        self.difference_areas = []  # Clear previous differences
 
+        # Cancel any previous status message clear callbacks
         if self.status_after_id:
             self.root.after_cancel(self.status_after_id)
+            self.status_after_id = None
 
-        self.status_label.config(text=text, fg=color)
+        # Try generating an altered image up to 20 times
+        for _ in range(20):
+            self.altered_image, self.difference_areas = (
+                self.processor.create_altered_image(self.original_image)
+            )
 
-        self.status_after_id = self.root.after(
-            duration,
-            self.clear_temporary_status
-        )
+            # Stop if exactly the required number of differences are generated
+            if len(self.difference_areas) == self.config.TOTAL_DIFFERENCES:
+                break
+
+        # Warn the user if fewer differences could be created
+        if len(self.difference_areas) < self.config.TOTAL_DIFFERENCES:
+            messagebox.showwarning(
+                "Warning",
+                f"Only {len(self.difference_areas)} differences could be generated."
+            )
+
+        # Reset zoom and view flags
+        self.zoom_multiplier = 1.0
+        self.view_changed = False
+        self.zoom_slider.set(self.config.ZOOM_DEFAULT)  # Reset zoom slider
+        self.update_fit_screen_button()  # Update any zoom-to-fit buttons
+
+        # Show Reveal button and disable Load button during game
+        self.reveal_button.pack(side=tk.LEFT, padx=(10, 0))
+        self.load_button.config(state=tk.DISABLED)
+
+        # Clear any status text
+        self.status_label.config(text="", fg="black")
+
+        # Ensure GUI updates are processed
+        self.root.update_idletasks()
+
+        # Prepare HUD mini-preview
+        self.create_hud_preview()
+        # Calculate scaling factor to fit images on screen
+        self.calculate_fit_zoom()
+        # Center images in their canvases
+        self.center_images()
+        # Render both original and altered images
+        self.display_images()
+        # Update labels showing score, mistakes, and remaining differences
+        self.update_game_labels()
+        
+    # It Displays a temporary status message to the user
+    # such as errors, warnings, or success notifications.
+    # The message automatically disappears after a set duration. 
+    
+        def show_temporary_status(self, text, color="black", duration=None):
+            if duration is None:
+                duration = self.config.STATUS_DURATION_MS
+
+            if self.status_after_id:
+                self.root.after_cancel(self.status_after_id)
+
+            self.status_label.config(text=text, fg=color)
+
+            self.status_after_id = self.root.after(
+                duration,
+                self.clear_temporary_status
+            )
