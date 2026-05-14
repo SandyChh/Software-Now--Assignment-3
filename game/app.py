@@ -355,27 +355,27 @@ class SpotDifferenceGame:
             self.status_label.config(text="", fg="black")
 
         self.status_after_id = None
-    
+        
     def check_guess(self, event):
-    # Ignore clicks if the game is over, current image is completed, or no image loaded
-    if self.game_over or self.current_image_completed or not self.original_image:
-        return
+        # Ignore clicks if the game is over, current image is completed, or no image loaded
+        if self.game_over or self.current_image_completed or not self.original_image:
+            return
 
-    # Ignore clicks if the user has dragged the image too much (likely accidental)
-    if self.total_drag_distance > 5:
-        return
+        # Ignore clicks if the user has dragged the image too much (likely accidental)
+        if self.total_drag_distance > 5:
+            return
 
-    # Convert canvas (GUI) coordinates to actual image pixel coordinates
-    image_pixel_x, image_pixel_y = self.canvas_to_image_coordinates(
-        event.x,
-        event.y
-    )
+        # Convert canvas (GUI) coordinates to actual image pixel coordinates
+        image_pixel_x, image_pixel_y = self.canvas_to_image_coordinates(
+            event.x,
+            event.y
+        )
 
-    # If conversion failed (click outside image), ignore
-    if image_pixel_x is None or image_pixel_y is None:
-        return
+        # If conversion failed (click outside image), ignore
+        if image_pixel_x is None or image_pixel_y is None:
+            return
 
-    clicked_found_area = False  # Flag to track if a correct difference was clicked
+        clicked_found_area = False  # Flag to track if a correct difference was clicked
 
     # Check each difference area to see if click is inside
     for area in self.difference_areas:
@@ -420,7 +420,7 @@ class SpotDifferenceGame:
     def point_inside_area(self, x, y, area):
     # Determine a "proximity" buffer around the difference area
     # This allows clicks near the difference to count as correct
-    padding = int(
+        padding = int(
         self.original_image.height * self.config.PROXIMITY_PADDING_RATIO
     )
 
