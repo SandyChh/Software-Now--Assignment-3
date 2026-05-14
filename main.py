@@ -1,10 +1,10 @@
 import tkinter as tk
-from game.app import DualSyncedImageGame
+from game.app import SpotDifferenceGame
 
 
 def main():
     root = tk.Tk()
-    app = DualSyncedImageGame(root)
+    app = SpotDifferenceGame(root)
     root.mainloop()
 
 
