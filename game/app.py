@@ -429,3 +429,25 @@ class SpotDifferenceGame:
         area["x1"] - padding <= x <= area["x2"] + padding and
         area["y1"] - padding <= y <= area["y2"] + padding
     )
+
+    def complete_current_image(self):
+        # Mark the current image round as completed
+        self.current_image_completed = True
+
+        # Cancel any scheduled temporary status clearing
+        if self.status_after_id:
+            self.root.after_cancel(self.status_after_id)
+            self.status_after_id = None
+
+        # Display a completion message to the player
+        self.status_label.config(
+            text="Image completed! Load another image to continue.",
+            fg="green"
+        )
+
+        # Hide the Reveal button since the round is over
+        self.reveal_button.pack_forget()
+        # Re-enable the Load Image button for the next round
+        self.load_button.config(state=tk.NORMAL)
+        # Update all game labels (score, mistakes, remaining differences)
+        self.update_game_labels()
