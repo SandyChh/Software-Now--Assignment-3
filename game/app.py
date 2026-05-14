@@ -349,3 +349,9 @@ class SpotDifferenceGame:
             duration,
             self.clear_temporary_status
         )
+        
+    def clear_temporary_status(self):
+        if not self.game_over:
+            self.status_label.config(text="", fg="black")
+
+        self.status_after_id = None
