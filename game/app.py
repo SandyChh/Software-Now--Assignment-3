@@ -349,9 +349,70 @@ class SpotDifferenceGame:
             duration,
             self.clear_temporary_status
         )
-        
+
     def clear_temporary_status(self):
         if not self.game_over:
             self.status_label.config(text="", fg="black")
 
         self.status_after_id = None
+    
+    def check_guess(self, event):
+    # Ignore clicks if the game is over, current image is completed, or no image loaded
+    if self.game_over or self.current_image_completed or not self.original_image:
+        return
+
+    # Ignore clicks if the user has dragged the image too much (likely accidental)
+    if self.total_drag_distance > 5:
+        return
+
+    # Convert canvas (GUI) coordinates to actual image pixel coordinates
+    image_pixel_x, image_pixel_y = self.canvas_to_image_coordinates(
+        event.x,
+        event.y
+    )
+
+    # If conversion failed (click outside image), ignore
+    if image_pixel_x is None or image_pixel_y is None:
+        return
+
+    clicked_found_area = False  # Flag to track if a correct difference was clicked
+
+    # Check each difference area to see if click is inside
+    for area in self.difference_areas:
+        if self.point_inside_area(image_pixel_x, image_pixel_y, area):
+            if area["found"]:  # Already found, ignore
+                return
+
+            area["found"] = True  # Mark area as found
+            clicked_found_area = True
+            break  # Stop checking other areas
+
+    if clicked_found_area:
+        # Player clicked correctly
+        self.total_score += 1  # Increment score
+        self.show_temporary_status(
+            "Correct! You found an altered area.",
+            "green"
+        )
+
+        self.update_game_labels()  # Refresh score/mistakes display
+        self.draw_game_markers()  # Draw circle markers around found differences
+
+        # If all differences are found, complete current round
+        if self.get_found_count() == len(self.difference_areas):
+            self.complete_current_image()
+
+    else:
+        # Player clicked incorrectly
+        self.mistakes += 1  # Increment mistakes counter
+
+        self.show_temporary_status(
+            "Wrong click! One mistake added.",
+            "red"
+        )
+
+        self.update_game_labels()  # Refresh score/mistakes display
+
+        # If maximum mistakes reached, fail the game
+        if self.mistakes >= self.config.MAX_MISTAKES:
+            self.fail_game()
