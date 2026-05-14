@@ -7,8 +7,12 @@ from .config import GameConfig
 from .image_pane import ImagePane
 from .image_processor import ImageProcessor
 
-
 class SpotDifferenceGame:
+  
+# Initializing the main Spot the Difference game window,
+# game settings, images, score tracking, zoom settings,
+# and all required variables for gameplay.  
+
     def __init__(self, root):
         self.root = root
         self.config = GameConfig()
@@ -86,12 +90,31 @@ class SpotDifferenceGame:
         )
         self.mistakes_label.pack(side=tk.LEFT, expand=True)
 
-        self.counter_label = tk.Label(
-            top_frame,
-            text="Found: 0 / Remaining: 0 / Total Score: 0",
+        score_frame = tk.Frame(top_frame)
+        score_frame.pack(side=tk.RIGHT)
+
+        self.total_score_label = tk.Label(
+            score_frame,
+            text="Total Score: 0",
             font=("Arial", 12, "bold")
         )
-        self.counter_label.pack(side=tk.RIGHT)
+        self.total_score_label.pack(side=tk.LEFT)
+
+        self.found_label = tk.Label(
+            score_frame,
+            text="   Found: 0",
+            font=("Arial", 12, "bold"),
+            fg="green"
+        )
+        self.found_label.pack(side=tk.LEFT)
+
+        self.remaining_label = tk.Label(
+            score_frame,
+            text="   Remaining: 0",
+            font=("Arial", 12, "bold"),
+            fg="orange"
+        )
+        self.remaining_label.pack(side=tk.LEFT)
 
         zoom_frame = tk.Frame(self.root)
         zoom_frame.pack(fill=tk.X, padx=10, pady=(0, 10))
