@@ -57,6 +57,10 @@ class SpotDifferenceGame:
 
         self.setup_ui()
 
+# It Creates and arranges all user interface components
+# including buttons, labels, canvases, zoom controls,
+# image panes, and event bindings for user interaction.
+
     def setup_ui(self):
         top_frame = tk.Frame(self.root)
         top_frame.pack(fill=tk.X, padx=10, pady=(10, 5))
@@ -238,6 +242,9 @@ class SpotDifferenceGame:
 
         self.root.bind("<Configure>", self.on_resize)
 
+# It Opens a file dialog to allow the user to select an image.
+# It validates the game state, loads the selected image,
+# and starts a new game round. 
     def load_image(self):
         if self.original_image and not self.current_image_completed and not self.game_over:
             self.show_temporary_status(
@@ -265,9 +272,17 @@ class SpotDifferenceGame:
         self.original_image = Image.open(file_path).convert("RGB")
         self.start_new_image_round()
 
+# It Starts a new game round by resetting game variables,
+# generating altered images and preparing the interface
+# for a new spot-the-difference challenge.
+
     def start_new_image_round():
         pass
     
+# It Displays a temporary status message to the user
+# such as errors, warnings, or success notifications.
+# The message automatically disappears after a set duration. 
+ 
     def show_temporary_status(self, text, color="black", duration=None):
         if duration is None:
             duration = self.config.STATUS_DURATION_MS

@@ -3,6 +3,10 @@ from .config import GameConfig
 
 
 class ImagePane:
+    
+# It Creates an image display pane containing a canvas,
+# title label, and hover preview box used for showing
+# images and user interactions during the game.
     def __init__(self, parent):
         self.frame = tk.Frame(parent)
 
