@@ -250,8 +250,25 @@ class ImageProcessor:
     def apply_random_effect(self, patch):
         brightness_score = self.get_patch_brightness(patch)
 
-        if brightness_score < 60 or brightness_score > 195:
+        # Too dark: force slight brightness increase first
+        if brightness_score < 60:
+            patch = cv2.convertScaleAbs(
+                patch,
+                alpha=1.0,
+                beta=random.randint(5, 10)
+            )
             strength = self.get_strong_strength()
+
+        # Too bright: force slight brightness decrease first
+        elif brightness_score > 195:
+            patch = cv2.convertScaleAbs(
+                patch,
+                alpha=1.0,
+                beta=-random.randint(5, 10)
+            )
+            strength = self.get_strong_strength()
+
+        # Normal brightness: use softer manipulation
         else:
             strength = self.get_soft_strength()
 
