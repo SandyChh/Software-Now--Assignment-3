@@ -520,3 +520,40 @@ class SpotDifferenceGame:
     def get_found_count(self):
         # count how many difference areas have been successfully found
         return sum(1 for area in self.difference_areas if area["found"])
+
+    def update_game_labels(self):
+        found = self.get_found_count()                                # number of differences found
+        remaining = len(self.difference_areas) - found                # remaining differences
+
+        # update "found" label
+        self.found_label.config(
+            text=(
+                f"   Found: {found}"
+            )
+        )
+        # update "remaining" label
+        self.remaining_label.config(
+            text=(
+                f"   Remaining: {remaining}"
+            )
+        )
+
+        # update total score display
+        self.total_score_label.config(
+            text=(
+                f"Total Score: {self.total_score}"
+            )
+        )
+
+        remaining_hearts = self.config.MAX_MISTAKES - self.mistakes    # lives left
+
+        hearts = "❤ " * remaining_hearts                              # remaining lives visual
+        empty_hearts = "♡ " * self.mistakes                           # used lives visual
+
+        # update mistakes display with visual heart system
+        self.mistakes_label.config(
+            text=(
+                f"Mistakes ({self.mistakes} / {self.config.MAX_MISTAKES}) "
+                f"{(hearts + empty_hearts).strip()}"
+            )
+        )
