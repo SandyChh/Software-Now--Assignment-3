@@ -451,3 +451,29 @@ class SpotDifferenceGame:
         self.load_button.config(state=tk.NORMAL)
         # Update all game labels (score, mistakes, remaining differences)
         self.update_game_labels()
+
+    def fail_game(self):
+        self.game_over = True                      # mark game as ended
+        self.current_image_completed = False       # reset round state
+
+        if self.status_after_id:                   # cancel pending UI messages
+            self.root.after_cancel(self.status_after_id)
+            self.status_after_id = None
+
+        self.status_label.config(                  # show final game over status
+            text=f"Game over. Final Score: {self.total_score}",
+            fg="red"
+        )
+
+        self.draw_game_markers(reveal_all=True)    # reveal all remaining differences
+
+        self.reveal_button.pack_forget()           # hide reveal option
+        self.load_button.config(state=tk.NORMAL)   # re-enable image loading
+
+        self.update_game_labels()                  # refresh UI counters
+
+        messagebox.showerror(                      # show final popup result
+            "Game Over",
+            f"You made {self.config.MAX_MISTAKES} mistakes.\n"
+            f"Final Score: {self.total_score}"
+        )
