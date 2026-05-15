@@ -645,3 +645,40 @@ class SpotDifferenceGame:
         y2 = image_top + area["y2"] * current_zoom
 
         return x1, y1, x2, y2  # return canvas bounding box
+
+    def draw_game_markers(self, reveal_all=False):
+        self.left_pane.canvas.delete("marker")   # remove existing markers
+        self.right_pane.canvas.delete("marker")  # remove existing markers
+
+        for area in self.difference_areas:  # iterate through all difference regions
+            marker_width = self.config.MARKER_WIDTH  # set marker thickness
+
+            # decide marker color based on state
+            if area["found"]:
+                color = self.config.FOUND_MARKER_COLOR
+            elif reveal_all:
+                color = self.config.REVEAL_MARKER_COLOR
+            else:
+                continue  # skip unfound areas unless reveal mode
+
+            x1, y1, x2, y2 = self.image_area_to_canvas_area(area)  # convert to canvas coords
+
+            # expand circle slightly for better visibility
+            padding = max(6, int((x2 - x1) * 0.4))
+
+            circle_x1 = x1 - padding  # top-left of marker circle
+            circle_y1 = y1 - padding  # top-left of marker circle
+            circle_x2 = x2 + padding  # bottom-right of marker circle
+            circle_y2 = y2 + padding  # bottom-right of marker circle
+
+            # draw marker on both image canvases
+            for canvas in (self.left_pane.canvas, self.right_pane.canvas):
+                canvas.create_oval(
+                    circle_x1,
+                    circle_y1,
+                    circle_x2,
+                    circle_y2,
+                    outline=color,
+                    width=marker_width,
+                    tags="marker"
+                )
