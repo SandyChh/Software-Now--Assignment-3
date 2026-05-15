@@ -621,3 +621,27 @@ class SpotDifferenceGame:
             return None, None
 
         return image_pixel_x, image_pixel_y  # return converted coordinates
+
+    def image_area_to_canvas_area(self, area):
+        current_zoom = self.get_current_zoom()  # get current zoom level
+
+        displayed_width = max(  # compute scaled image width
+            1,
+            int(self.original_image.width * current_zoom)
+        )
+
+        displayed_height = max(  # compute scaled image height
+            1,
+            int(self.original_image.height * current_zoom)
+        )
+
+        image_left = self.image_x - displayed_width / 2  # calculate image left offset
+        image_top = self.image_y - displayed_height / 2  # calculate image top offset
+
+        # convert image coordinates to canvas coordinates
+        x1 = image_left + area["x1"] * current_zoom
+        y1 = image_top + area["y1"] * current_zoom
+        x2 = image_left + area["x2"] * current_zoom
+        y2 = image_top + area["y2"] * current_zoom
+
+        return x1, y1, x2, y2  # return canvas bounding box
