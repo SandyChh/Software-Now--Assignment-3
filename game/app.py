@@ -557,3 +557,37 @@ class SpotDifferenceGame:
                 f"{(hearts + empty_hearts).strip()}"
             )
         )
+
+    def reset_full_game(self):
+        self.mistakes = 0  # reset mistakes counter
+        self.total_score = 0  # reset total score
+        self.game_over = False  # reset game state
+        self.current_image_completed = False  # reset current round state
+
+        self.original_image = None  # clear original image
+        self.altered_image = None  # clear altered image
+        self.difference_areas = []  # clear stored differences
+
+        if self.status_after_id:  # cancel any pending status updates
+            self.root.after_cancel(self.status_after_id)
+            self.status_after_id = None
+
+        self.left_pane.canvas.delete("all")  # clear left image canvas
+        self.right_pane.canvas.delete("all")  # clear right image canvas
+        self.hud_canvas.delete("all")  # clear HUD preview
+        self.clear_both_hover_previews()  # reset hover previews
+
+        self.zoom_multiplier = 1.0  # reset zoom level
+        self.view_changed = False  # reset view state
+        self.zoom_slider.set(self.config.ZOOM_DEFAULT)  # reset zoom slider
+        self.hide_fit_screen_button()  # hide fit screen button
+
+        self.load_button.config(state=tk.NORMAL)  # enable image loading
+        self.reveal_button.pack_forget()  # hide reveal button
+
+        self.status_label.config(
+            text="Load an image to start the game.",  # reset status message
+            fg="white"
+        ) 
+
+        self.update_game_labels()  # refresh UI counters
