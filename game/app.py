@@ -175,7 +175,7 @@ class SpotDifferenceGame:
             self.root,
             text="Load an image to start the game.",
             font=("Arial", 13, "bold"),
-            fg="white"
+            fg="lightblue"
         )
         self.status_label.pack(pady=(0, 5))
 
@@ -598,7 +598,7 @@ class SpotDifferenceGame:
 
         self.status_label.config(
             text="Load an image to start the game.",  # reset status message
-            fg="white"
+            fg="lightblue"
         ) 
 
         self.update_game_labels()  # refresh UI counters
