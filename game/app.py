@@ -377,23 +377,23 @@ class SpotDifferenceGame:
 
         clicked_found_area = False  # Flag to track if a correct difference was clicked
 
-    # Check each difference area to see if click is inside
-    for area in self.difference_areas:
-        if self.point_inside_area(image_pixel_x, image_pixel_y, area):
-            if area["found"]:  # Already found, ignore
-                return
+        # Check each difference area to see if click is inside
+        for area in self.difference_areas:
+            if self.point_inside_area(image_pixel_x, image_pixel_y, area):
+                if area["found"]:  # Already found, ignore
+                    return
 
-            area["found"] = True  # Mark area as found
-            clicked_found_area = True
-            break  # Stop checking other areas
+                area["found"] = True  # Mark area as found
+                clicked_found_area = True
+                break  # Stop checking other areas
 
-    if clicked_found_area:
-        # Player clicked correctly
-        self.total_score += 1  # Increment score
-        self.show_temporary_status(
-            "Correct! You found an altered area.",
-            "green"
-        )
+        if clicked_found_area:
+            # Player clicked correctly
+            self.total_score += 1  # Increment score
+            self.show_temporary_status(
+                "Correct! You found an altered area.",
+                "green"
+            )
 
         self.update_game_labels()  # Refresh score/mistakes display
         self.draw_game_markers()  # Draw circle markers around found differences
