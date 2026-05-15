@@ -167,10 +167,10 @@ Ensure you have the following Python libraries installed:
 
 #### You can install them using: ####
 ```
-pip install -r requirements.txt
+pip install pillow opencv-python numpy
 ```
 
-### 1. Clone Repository
+###  Clone Repository
 ```bash
 git clone https://github.com/SandyChh/Software-Now--Assignment-3.git
 cd Software-Now--Assignment-3
