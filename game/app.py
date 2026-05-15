@@ -754,3 +754,315 @@ class SpotDifferenceGame:
             image=pane.hover_tk_image,
             anchor=tk.NW
         )  # render updated hover preview
+
+        
+    def clear_hover_preview(self, pane):
+        if pane.hover_box:
+            pane.hover_box.delete("all")
+
+        pane.hover_tk_image = None
+
+    def clear_both_hover_previews(self):
+        self.clear_hover_preview(self.left_pane)
+        self.clear_hover_preview(self.right_pane)
+
+    def create_hud_preview(self):
+        if not self.original_image:
+            return
+
+        max_width = self.config.HUD_WIDTH - 10
+        max_height = self.config.HUD_HEIGHT - 10
+
+        preview = self.original_image.copy()
+        preview.thumbnail(
+            (max_width, max_height),
+            Image.Resampling.LANCZOS
+        )
+
+        self.hud_preview_width = preview.width
+        self.hud_preview_height = preview.height
+        self.hud_tk_image = ImageTk.PhotoImage(preview)
+
+    def calculate_fit_zoom(self):
+        if not self.original_image:
+            return
+
+        left_width = self.left_pane.canvas.winfo_width()
+        left_height = self.left_pane.canvas.winfo_height()
+
+        right_width = self.right_pane.canvas.winfo_width()
+        right_height = self.right_pane.canvas.winfo_height()
+
+        canvas_width = min(left_width, right_width)
+        canvas_height = min(left_height, right_height)
+
+        if canvas_width <= 1 or canvas_height <= 1:
+            return
+
+        width_ratio = canvas_width / self.original_image.width
+        height_ratio = canvas_height / self.original_image.height
+
+        self.fit_zoom = min(width_ratio, height_ratio)
+
+    def get_current_zoom(self):
+        return self.fit_zoom * self.zoom_multiplier
+
+    def center_images(self):
+        canvas_width = self.left_pane.canvas.winfo_width()
+        canvas_height = self.left_pane.canvas.winfo_height()
+
+        self.image_x = canvas_width // 2
+        self.image_y = canvas_height // 2
+
+    def display_images(self):
+        if not self.original_image or not self.altered_image:
+            return
+
+        current_zoom = self.get_current_zoom()
+
+        displayed_width = max(
+            1,
+            int(self.original_image.width * current_zoom)
+        )
+
+        displayed_height = max(
+            1,
+            int(self.original_image.height * current_zoom)
+        )
+
+        resized_original = self.original_image.resize(
+            (displayed_width, displayed_height),
+            Image.Resampling.LANCZOS
+        )
+
+        resized_altered = self.altered_image.resize(
+            (displayed_width, displayed_height),
+            Image.Resampling.LANCZOS
+        )
+
+        self.left_tk_image = ImageTk.PhotoImage(resized_original)
+        self.right_tk_image = ImageTk.PhotoImage(resized_altered)
+
+        self.left_pane.canvas.delete("all")
+        self.left_pane.canvas.create_image(
+            self.image_x,
+            self.image_y,
+            image=self.left_tk_image,
+            anchor=tk.CENTER,
+            tags="image"
+        )
+
+        self.right_pane.canvas.delete("all")
+        self.right_pane.canvas.create_image(
+            self.image_x,
+            self.image_y,
+            image=self.right_tk_image,
+            anchor=tk.CENTER,
+            tags="image"
+        )
+
+        self.zoom_label.config(
+            text=f"Zoom: {int(self.zoom_multiplier * 100)}%"
+        )
+
+        self.draw_hud(displayed_width, displayed_height)
+        self.draw_game_markers(
+            reveal_all=self.game_over
+        )
+
+    def draw_hud(self, displayed_width, displayed_height):
+        if not self.original_image or not self.hud_tk_image:
+            return
+
+        self.hud_canvas.delete("all")
+
+        hud_x = (self.config.HUD_WIDTH - self.hud_preview_width) / 2
+        hud_y = (self.config.HUD_HEIGHT - self.hud_preview_height) / 2
+
+        self.hud_canvas.create_image(
+            hud_x,
+            hud_y,
+            image=self.hud_tk_image,
+            anchor=tk.NW
+        )
+
+        canvas_width = self.left_pane.canvas.winfo_width()
+        canvas_height = self.left_pane.canvas.winfo_height()
+
+        image_left = self.image_x - displayed_width / 2
+        image_top = self.image_y - displayed_height / 2
+
+        visible_left = max(0, -image_left)
+        visible_top = max(0, -image_top)
+        visible_right = min(displayed_width, canvas_width - image_left)
+        visible_bottom = min(displayed_height, canvas_height - image_top)
+
+        if visible_right <= visible_left or visible_bottom <= visible_top:
+            return
+
+        scale_x = self.hud_preview_width / displayed_width
+        scale_y = self.hud_preview_height / displayed_height
+
+        red_x1 = hud_x + visible_left * scale_x
+        red_y1 = hud_y + visible_top * scale_y
+        red_x2 = hud_x + visible_right * scale_x
+        red_y2 = hud_y + visible_bottom * scale_y
+
+        self.hud_canvas.create_rectangle(
+            red_x1,
+            red_y1,
+            red_x2,
+            red_y2,
+            outline="red",
+            width=2
+        )
+
+    def redraw_hud_only(self):
+        if not self.original_image:
+            return
+
+        displayed_width = max(
+            1,
+            int(self.original_image.width * self.get_current_zoom())
+        )
+
+        displayed_height = max(
+            1,
+            int(self.original_image.height * self.get_current_zoom())
+        )
+
+        self.draw_hud(displayed_width, displayed_height)
+
+    def fit_to_screen(self):
+        if not self.original_image:
+            return
+
+        if self.zoom_after_id:
+            self.root.after_cancel(self.zoom_after_id)
+            self.zoom_after_id = None
+
+        self.zoom_multiplier = 1.0
+        self.view_changed = False
+
+        self.calculate_fit_zoom()
+        self.center_images()
+
+        self.ignore_zoom_callback = True
+        self.zoom_slider.set(self.config.ZOOM_DEFAULT)
+        self.ignore_zoom_callback = False
+
+        self.display_images()
+        self.hide_fit_screen_button()
+
+    def update_fit_screen_button(self):
+        if not self.original_image:
+            self.hide_fit_screen_button()
+            return
+
+        is_zoomed = round(self.zoom_multiplier, 2) != 1.0
+
+        if is_zoomed or self.view_changed:
+            self.show_fit_screen_button()
+        else:
+            self.hide_fit_screen_button()
+        
+    def show_fit_screen_button(self):
+        if self.fit_screen_button is not None:
+            return
+
+        self.fit_screen_button = tk.Button(
+            self.root,
+            text="⛶",
+            command=self.fit_to_screen,
+            font=("Arial", 18, "bold"),
+            width=3,
+            height=1,
+            bg="white",
+            fg="black"
+        )
+
+        self.fit_screen_button.place(
+            relx=1.0,
+            rely=1.0,
+            x=-20,
+            y=-35,
+            anchor="se"
+        )
+
+
+    def hide_fit_screen_button(self):
+        if self.fit_screen_button is not None:
+            self.fit_screen_button.destroy()
+            self.fit_screen_button = None
+
+    def schedule_zoom(self, value):
+        if not self.original_image:
+            return
+
+        if self.ignore_zoom_callback:
+            return
+
+        self.zoom_multiplier = int(value) / 100
+
+        if round(self.zoom_multiplier, 2) != 1.0:
+            self.view_changed = True
+
+        self.zoom_label.config(
+            text=f"Zoom: {int(self.zoom_multiplier * 100)}%"
+        )
+
+        self.update_fit_screen_button()
+
+        if self.zoom_after_id:
+            self.root.after_cancel(self.zoom_after_id)
+
+        self.zoom_after_id = self.root.after(80, self.display_images)
+
+    def start_drag(self, event):
+        self.drag_start_x = event.x
+        self.drag_start_y = event.y
+        self.total_drag_distance = 0
+
+    def drag_both_images(self, event):
+        if not self.original_image:
+            return
+
+        dx = event.x - self.drag_start_x
+        dy = event.y - self.drag_start_y
+
+        if dx != 0 or dy != 0:
+            self.view_changed = True
+
+        self.total_drag_distance += math.sqrt(dx * dx + dy * dy)
+
+        self.image_x += dx
+        self.image_y += dy
+
+        self.drag_start_x = event.x
+        self.drag_start_y = event.y
+
+        self.left_pane.canvas.move("image", dx, dy)
+        self.right_pane.canvas.move("image", dx, dy)
+
+        self.left_pane.canvas.move("marker", dx, dy)
+        self.right_pane.canvas.move("marker", dx, dy)
+
+        self.redraw_hud_only()
+        self.update_fit_screen_button()
+
+    def on_resize(self, event):
+        if event.widget == self.root and self.original_image:
+            if self.resize_after_id:
+                self.root.after_cancel(self.resize_after_id)
+
+            self.resize_after_id = self.root.after(
+                120,
+                self.resize_to_fit_again
+            )
+
+    def resize_to_fit_again(self):
+        self.calculate_fit_zoom()
+        self.center_images()
+        self.view_changed = False
+        self.display_images()
+        self.update_fit_screen_button()
