@@ -402,20 +402,20 @@ class SpotDifferenceGame:
         if self.get_found_count() == len(self.difference_areas):
             self.complete_current_image()
 
-    else:
-        # Player clicked incorrectly
-        self.mistakes += 1  # Increment mistakes counter
+        else:
+            # Player clicked incorrectly
+            self.mistakes += 1  # Increment mistakes counter
 
-        self.show_temporary_status(
-            "Wrong click! One mistake added.",
-            "red"
-        )
+            self.show_temporary_status(
+                "Wrong click! One mistake added.",
+                "red"
+            )
 
-        self.update_game_labels()  # Refresh score/mistakes display
+            self.update_game_labels()  # Refresh score/mistakes display
 
-        # If maximum mistakes reached, fail the game
-        if self.mistakes >= self.config.MAX_MISTAKES:
-            self.fail_game()
+            # If maximum mistakes reached, fail the game
+            if self.mistakes >= self.config.MAX_MISTAKES:
+                self.fail_game()
 
     def point_inside_area(self, x, y, area):
     # Determine a "proximity" buffer around the difference area
