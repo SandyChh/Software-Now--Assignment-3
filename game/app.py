@@ -64,56 +64,84 @@ class SpotDifferenceGame:
         top_frame = tk.Frame(self.root)
         top_frame.pack(fill=tk.X, padx=10, pady=(10, 5))
 
+        # --- Left: Load + Reveal buttons stacked vertically ---
+        button_frame = tk.Frame(top_frame)
+        button_frame.pack(side=tk.LEFT)
+
         self.load_button = tk.Button(
-            top_frame,
+            button_frame,
             text="Load Image",
             command=self.load_image,
             font=("Arial", 12),
             padx=15,
             pady=5
         )
-        self.load_button.pack(side=tk.LEFT)
+        self.load_button.pack(side=tk.TOP)
 
         self.reveal_button = tk.Button(
-            top_frame,
+            button_frame,
             text="Reveal",
             command=self.reveal_remaining_differences,
             font=("Arial", 12),
             padx=15,
             pady=5
         )
-        self.reveal_button.pack(side=tk.LEFT, padx=(10, 0))
-        self.reveal_button.pack_forget()
+        # Measure the button's real height before packing
+        self.reveal_button.update_idletasks()
+        btn_h = self.reveal_button.winfo_reqheight()
+        btn_w = self.reveal_button.winfo_reqwidth()
 
+        self.reveal_placeholder = tk.Frame(button_frame, width=btn_w, height=btn_h)
+        
+        self.reveal_placeholder.pack(side=tk.TOP, pady=(5, 0))
+        self.reveal_placeholder.pack_propagate(False)
+
+        # --- Centre/Right: 2×2 stats grid ---
+        stats_frame = tk.Frame(top_frame)
+        stats_frame.pack(side=tk.RIGHT, padx=(0, 10))
+
+        # Row 0: Mistakes label | Total Score label
         self.mistakes_label = tk.Label(
-            top_frame,
-            text="Mistakes (0 / 3) ❤ ❤ ❤",
-            font=("Arial", 16, "bold"),
-            fg="red"
+            stats_frame,
+            text="Mistakes (0 / 3)",
+            font=("Arial", 14, "bold"),
+            fg="red",
+            anchor="w"
         )
-        self.mistakes_label.pack(side=tk.LEFT, expand=True)
-
-        score_frame = tk.Frame(top_frame)
-        score_frame.pack(side=tk.RIGHT)
+        self.mistakes_label.grid(row=0, column=0, sticky="w", padx=(0, 30))
 
         self.total_score_label = tk.Label(
-            score_frame,
+            stats_frame,
             text="Total Score: 0",
-            font=("Arial", 12, "bold")
+            font=("Arial", 14, "bold"),
+            anchor="e"
         )
-        self.total_score_label.pack(side=tk.LEFT)
+        self.total_score_label.grid(row=0, column=1, sticky="e")
+
+        # Row 1: Hearts label | Found + Remaining labels
+        self.hearts_label = tk.Label(
+            stats_frame,
+            text="❤ ❤ ❤",
+            font=("Arial", 13),
+            fg="red",
+            anchor="w"
+        )
+        self.hearts_label.grid(row=1, column=0, sticky="w")
+
+        found_remaining_frame = tk.Frame(stats_frame)
+        found_remaining_frame.grid(row=1, column=1, sticky="e")
 
         self.found_label = tk.Label(
-            score_frame,
-            text="   Found: 0",
+            found_remaining_frame,
+            text="Found: 0",
             font=("Arial", 12, "bold"),
             fg="green"
         )
         self.found_label.pack(side=tk.LEFT)
 
         self.remaining_label = tk.Label(
-            score_frame,
-            text="   Remaining: 0",
+            found_remaining_frame,
+            text="  Remaining: 0",
             font=("Arial", 12, "bold"),
             fg="orange"
         )
@@ -311,7 +339,8 @@ class SpotDifferenceGame:
         self.update_fit_screen_button()  # Update any zoom-to-fit buttons
 
         # Show Reveal button and disable Load button during game
-        self.reveal_button.pack(side=tk.LEFT, padx=(10, 0))
+        self.reveal_placeholder.pack_forget()
+        self.reveal_button.pack(side=tk.TOP, pady=(5, 0))
         self.load_button.config(state=tk.DISABLED)
 
         # Clear any status text
@@ -445,7 +474,7 @@ class SpotDifferenceGame:
         )
 
         # Hide the Reveal button since the round is over
-        self.reveal_button.pack_forget()
+        self.hide_reveal_button()
         # Re-enable the Load Image button for the next round
         self.load_button.config(state=tk.NORMAL)
         # Update all game labels (score, mistakes, remaining differences)
@@ -466,7 +495,7 @@ class SpotDifferenceGame:
 
         self.draw_game_markers(reveal_all=True)    # reveal all remaining differences
 
-        self.reveal_button.pack_forget()           # hide reveal option
+        self.hide_reveal_button()                  # hide reveal option
         self.load_button.config(state=tk.NORMAL)   # re-enable image loading
 
         self.update_game_labels()                  # refresh UI counters
@@ -477,8 +506,9 @@ class SpotDifferenceGame:
             f"Final Score: {self.total_score}"
         )
 
-    def hide_reveal_button(self):
-        self.reveal_button.pack_forget()              # simply hides reveal button from UI
+    def hide_reveal_button(self):                  # simply hides reveal button from UI
+        self.reveal_button.pack_forget()
+        self.reveal_placeholder.pack(side=tk.TOP, pady=(5, 0))
 
 
     def reveal_remaining_differences(self):
@@ -505,7 +535,7 @@ class SpotDifferenceGame:
 
         self.draw_game_markers(reveal_all=True)      # highlight all hidden differences
 
-        self.reveal_button.pack_forget()             # hide reveal option after use
+        self.hide_reveal_button()             # hide reveal option after use
         self.load_button.config(state=tk.NORMAL)     # allow new image to be loaded
 
         self.update_game_labels()                   # refresh score and UI counters
@@ -521,40 +551,22 @@ class SpotDifferenceGame:
         return sum(1 for area in self.difference_areas if area["found"])
 
     def update_game_labels(self):
-        found = self.get_found_count()                                # number of differences found
-        remaining = len(self.difference_areas) - found                # remaining differences
+        found = self.get_found_count()
+        remaining = len(self.difference_areas) - found
 
-        # update "found" label
-        self.found_label.config(
-            text=(
-                f"   Found: {found}"
-            )
-        )
-        # update "remaining" label
-        self.remaining_label.config(
-            text=(
-                f"   Remaining: {remaining}"
-            )
-        )
+        self.found_label.config(text=f"Found: {found}")
+        self.remaining_label.config(text=f"  Remaining: {remaining}")
+        self.total_score_label.config(text=f"Total Score: {self.total_score}")
 
-        # update total score display
-        self.total_score_label.config(
-            text=(
-                f"Total Score: {self.total_score}"
-            )
-        )
+        remaining_hearts = self.config.MAX_MISTAKES - self.mistakes
+        hearts = ("❤ " * remaining_hearts).strip()
+        empty_hearts = ("♡ " * self.mistakes).strip()
 
-        remaining_hearts = self.config.MAX_MISTAKES - self.mistakes    # lives left
-
-        hearts = "❤ " * remaining_hearts                              # remaining lives visual
-        empty_hearts = "♡ " * self.mistakes                           # used lives visual
-
-        # update mistakes display with visual heart system
         self.mistakes_label.config(
-            text=(
-                f"Mistakes ({self.mistakes} / {self.config.MAX_MISTAKES}) "
-                f"{(hearts + empty_hearts).strip()}"
-            )
+            text=f"Mistakes ({self.mistakes} / {self.config.MAX_MISTAKES})"
+        )
+        self.hearts_label.config(
+            text=f"{hearts}  {empty_hearts}".strip()
         )
 
     def reset_full_game(self):
@@ -582,7 +594,7 @@ class SpotDifferenceGame:
         self.hide_fit_screen_button()  # hide fit screen button
 
         self.load_button.config(state=tk.NORMAL)  # enable image loading
-        self.reveal_button.pack_forget()  # hide reveal button
+        self.hide_reveal_button()  # hide reveal button
 
         self.status_label.config(
             text="Load an image to start the game.",  # reset status message
