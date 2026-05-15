@@ -395,12 +395,12 @@ class SpotDifferenceGame:
                 "green"
             )
 
-        self.update_game_labels()  # Refresh score/mistakes display
-        self.draw_game_markers()  # Draw circle markers around found differences
+            self.update_game_labels()  # Refresh score/mistakes display
+            self.draw_game_markers()  # Draw circle markers around found differences
 
-        # If all differences are found, complete current round
-        if self.get_found_count() == len(self.difference_areas):
-            self.complete_current_image()
+            # If all differences are found, complete current round
+            if self.get_found_count() == len(self.difference_areas):
+                self.complete_current_image()
 
         else:
             # Player clicked incorrectly
@@ -418,11 +418,11 @@ class SpotDifferenceGame:
                 self.fail_game()
 
     def point_inside_area(self, x, y, area):
-    # Determine a "proximity" buffer around the difference area
-    # This allows clicks near the difference to count as correct
+        # Determine a "proximity" buffer around the difference area
+        # This allows clicks near the difference to count as correct
         padding = int(
-        self.original_image.height * self.config.PROXIMITY_PADDING_RATIO
-    )
+            self.original_image.height * self.config.PROXIMITY_PADDING_RATIO
+        )
 
     # Check if the click (x, y) lies within the difference rectangle plus padding
         return (
