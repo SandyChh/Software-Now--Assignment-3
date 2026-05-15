@@ -8,10 +8,9 @@ from .image_pane import ImagePane
 from .image_processor import ImageProcessor
 
 class SpotDifferenceGame:
-  
-# Initializing the main Spot the Difference game window,
-# game settings, images, score tracking, zoom settings,
-# and all required variables for gameplay.  
+    # Initializing the main Spot the Difference game window,
+    # game settings, images, score tracking, zoom settings,
+    # and all required variables for gameplay.  
 
     def __init__(self, root):
         self.root = root
@@ -57,9 +56,9 @@ class SpotDifferenceGame:
 
         self.setup_ui()
 
-# It Creates and arranges all user interface components
-# including buttons, labels, canvases, zoom controls,
-# image panes, and event bindings for user interaction.
+    # It Creates and arranges all user interface components
+    # including buttons, labels, canvases, zoom controls,
+    # image panes, and event bindings for user interaction.
 
     def setup_ui(self):
         top_frame = tk.Frame(self.root)
@@ -242,9 +241,9 @@ class SpotDifferenceGame:
 
         self.root.bind("<Configure>", self.on_resize)
 
-# It Opens a file dialog to allow the user to select an image.
-# It validates the game state, loads the selected image,
-# and starts a new game round. 
+    # It Opens a file dialog to allow the user to select an image.
+    # It validates the game state, loads the selected image,
+    # and starts a new game round. 
     def load_image(self):
         if self.original_image and not self.current_image_completed and not self.game_over:
             self.show_temporary_status(
@@ -272,9 +271,9 @@ class SpotDifferenceGame:
         self.original_image = Image.open(file_path).convert("RGB")
         self.start_new_image_round()
 
-# It Starts a new game round by resetting game variables,
-# generating altered images and preparing the interface
-# for a new spot-the-difference challenge.
+    # It Starts a new game round by resetting game variables,
+    # generating altered images and preparing the interface
+    # for a new spot-the-difference challenge.
 
     def start_new_image_round(self):
         # Reset game state for a new image round
