@@ -45,3 +45,5 @@ htmlcov/
 # Project generated files
 outputs/
 screenshots/
+
+results/
