@@ -167,7 +167,7 @@ Ensure you have the following Python libraries installed:
 
 #### You can install them using: ####
 ```
-pip install pillow opencv-python numpy
+pip install -r requirements.txt
 ```
 
 ###  Clone Repository
