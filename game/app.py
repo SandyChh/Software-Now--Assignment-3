@@ -591,3 +591,33 @@ class SpotDifferenceGame:
         ) 
 
         self.update_game_labels()  # refresh UI counters
+
+    def canvas_to_image_coordinates(self, canvas_x, canvas_y):
+        current_zoom = self.get_current_zoom()  # get current zoom level
+
+        displayed_width = max(  # calculate displayed image width
+            1,
+            int(self.original_image.width * current_zoom)
+        )
+
+        displayed_height = max(  # calculate displayed image height
+            1,
+            int(self.original_image.height * current_zoom)
+        )
+
+        image_left = self.image_x - displayed_width / 2  # left position of image on canvas
+        image_top = self.image_y - displayed_height / 2  # top position of image on canvas
+
+        image_pixel_x = int((canvas_x - image_left) / current_zoom)  # map canvas X to image X
+        image_pixel_y = int((canvas_y - image_top) / current_zoom)  # map canvas Y to image Y
+
+        # check if click is outside image boundaries
+        if (
+            image_pixel_x < 0 or
+            image_pixel_y < 0 or
+            image_pixel_x >= self.original_image.width or
+            image_pixel_y >= self.original_image.height
+        ):
+            return None, None
+
+        return image_pixel_x, image_pixel_y  # return converted coordinates
