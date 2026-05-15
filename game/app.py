@@ -711,3 +711,46 @@ class SpotDifferenceGame:
             image_pixel_x=image_pixel_x,
             image_pixel_y=image_pixel_y
         )
+
+    def draw_hover_preview(self, pane, source_image, image_pixel_x, image_pixel_y):
+        crop_height = max(  # ensure minimum crop height for preview
+            10,
+            int(source_image.height * self.config.HOVER_CROP_HEIGHT_RATIO)
+        )
+
+        crop_width = int(  # maintain preview aspect ratio
+            crop_height *
+            (
+                self.config.HOVER_PREVIEW_WIDTH /
+                self.config.HOVER_PREVIEW_HEIGHT
+            )
+        )
+
+        half_w = crop_width // 2  # half width for centering crop
+        half_h = crop_height // 2  # half height for centering crop
+
+        # define crop boundaries while keeping inside image limits
+        crop_x1 = max(0, image_pixel_x - half_w)
+        crop_y1 = max(0, image_pixel_y - half_h)
+        crop_x2 = min(source_image.width, image_pixel_x + half_w)
+        crop_y2 = min(source_image.height, image_pixel_y + half_h)
+
+        crop = source_image.crop((crop_x1, crop_y1, crop_x2, crop_y2))  # extract image region
+
+        crop = crop.resize(  # resize crop to fixed preview size
+            (
+                self.config.HOVER_PREVIEW_WIDTH,
+                self.config.HOVER_PREVIEW_HEIGHT
+            ),
+            Image.Resampling.LANCZOS  # high-quality resampling for sharp preview
+        )
+
+        pane.hover_tk_image = ImageTk.PhotoImage(crop)  # convert to Tkinter image
+
+        pane.hover_box.delete("all")  # clear previous hover preview
+        pane.hover_box.create_image(
+            0,
+            0,
+            image=pane.hover_tk_image,
+            anchor=tk.NW
+        )  # render updated hover preview
