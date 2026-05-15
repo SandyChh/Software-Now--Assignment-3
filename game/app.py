@@ -477,3 +477,42 @@ class SpotDifferenceGame:
             f"You made {self.config.MAX_MISTAKES} mistakes.\n"
             f"Final Score: {self.total_score}"
         )
+
+        def hide_reveal_button(self):
+    self.reveal_button.pack_forget()              # simply hides reveal button from UI
+
+
+def reveal_remaining_differences(self):
+    # block action if no image or game already ended/completed
+    if (
+        not self.original_image or
+        self.game_over or
+        self.current_image_completed
+    ):
+        return
+
+    self.game_over = True                         # end current round after reveal
+
+    # cancel any pending status message updates
+    if self.status_after_id:
+        self.root.after_cancel(self.status_after_id)
+        self.status_after_id = None
+
+    # show reveal status message
+    self.status_label.config(
+        text=f"Revealed remaining differences. Final Score: {self.total_score}",
+        fg="orange"
+    )
+
+    self.draw_game_markers(reveal_all=True)      # highlight all hidden differences
+
+    self.reveal_button.pack_forget()             # hide reveal option after use
+    self.load_button.config(state=tk.NORMAL)     # allow new image to be loaded
+
+    self.update_game_labels()                   # refresh score and UI counters
+
+    # final info popup to user
+    messagebox.showinfo(
+        "Revealed",
+        f"Remaining differences revealed.\nFinal Score: {self.total_score}"
+    )
