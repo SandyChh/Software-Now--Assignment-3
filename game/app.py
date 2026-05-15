@@ -682,3 +682,32 @@ class SpotDifferenceGame:
                     width=marker_width,
                     tags="marker"
                 )
+
+    def update_both_hover_previews(self, event):
+        if not self.original_image or not self.altered_image:  # ensure both images exist
+            return
+
+        image_pixel_x, image_pixel_y = self.canvas_to_image_coordinates(
+            event.x,
+            event.y
+        )  # convert mouse position to image coordinates
+
+        if image_pixel_x is None or image_pixel_y is None:  # cursor outside image area
+            self.clear_both_hover_previews()  # remove hover previews
+            return
+
+        # show hover preview on original image (left pane)
+        self.draw_hover_preview(
+            pane=self.left_pane,
+            source_image=self.original_image,
+            image_pixel_x=image_pixel_x,
+            image_pixel_y=image_pixel_y
+        )
+
+        # show hover preview on altered image (right pane)
+        self.draw_hover_preview(
+            pane=self.right_pane,
+            source_image=self.altered_image,
+            image_pixel_x=image_pixel_x,
+            image_pixel_y=image_pixel_y
+        )
